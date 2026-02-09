@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(("/orders"))
+@RequestMapping(("/core"))
 @RequiredArgsConstructor
 @Slf4j
 public class orderController {
@@ -33,7 +33,7 @@ public class orderController {
         return ResponseEntity.ok(orders);
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public  ResponseEntity<OrderRequestDto> getOrderById(@PathVariable Long id) {
         log.info("Fetching order with ID: {}", id);
         OrderRequestDto order=ordersService.getOrderById(id);
