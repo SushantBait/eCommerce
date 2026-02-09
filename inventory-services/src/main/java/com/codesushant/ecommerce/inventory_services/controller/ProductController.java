@@ -30,9 +30,10 @@ public class ProductController {
 
     @GetMapping("/fetchOrders")
     public String fetchFromOrderService(){
-        ServiceInstance orderService = discoveryClient.getInstances("order-services").get(0);
+        ServiceInstance orderService = discoveryClient.getInstances("order-service").get(0);
+
         return restClient.get()
-                .uri(orderService.getUri()+"/api/v1/orders/helloOrder")
+                .uri(orderService.getUri()+"/orders/core/helloOrder")
                 .retrieve().body(String.class);
     }
 
@@ -43,7 +44,7 @@ public class ProductController {
         return ResponseEntity.ok(inventories);
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getEnventoryById(@PathVariable Long id){
         ProductDto inventory = productService.getProductById(id);
 
