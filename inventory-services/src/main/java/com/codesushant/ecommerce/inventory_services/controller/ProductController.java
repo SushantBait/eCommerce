@@ -1,5 +1,6 @@
 package com.codesushant.ecommerce.inventory_services.controller;
 
+import com.codesushant.ecommerce.inventory_services.clients.OrdersFeignClient;
 import com.codesushant.ecommerce.inventory_services.dto.ProductDto;
 import com.codesushant.ecommerce.inventory_services.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +28,17 @@ public class ProductController {
 
     private final RestClient restClient;
 
+    private final OrdersFeignClient ordersFeignClient;
 
     @GetMapping("/fetchOrders")
     public String fetchFromOrderService(){
         ServiceInstance orderService = discoveryClient.getInstances("order-service").get(0);
 
-        return restClient.get()
-                .uri(orderService.getUri()+"/orders/core/helloOrder")
-                .retrieve().body(String.class);
+//        return restClient.get()
+//                .uri(orderService.getUri()+"/orders/core/helloOrder")
+//                .retrieve().body(String.class);
+//        http://localhost:8080/api/v1/inventory/products/fetchOrders    for calling
+        return ordersFeignClient.helloOrders();
     }
 
     @GetMapping
