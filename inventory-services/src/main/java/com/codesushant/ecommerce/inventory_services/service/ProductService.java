@@ -1,5 +1,7 @@
 package com.codesushant.ecommerce.inventory_services.service;
 
+import com.codesushant.ecommerce.inventory_services.dto.OrderRequestDto;
+import com.codesushant.ecommerce.inventory_services.dto.OrderRequestItemDto;
 import com.codesushant.ecommerce.inventory_services.dto.ProductDto;
 import com.codesushant.ecommerce.inventory_services.entity.Product;
 import com.codesushant.ecommerce.inventory_services.repository.ProductRepository;
@@ -8,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,4 +36,23 @@ public class ProductService {
         return inventory.map(item ->modelMapper.map(item, ProductDto.class)).orElseThrow(() -> new RuntimeException("Inventory Not Found"));
     }
 
+    @Transactional
+    public Double reduceStocks(OrderRequestDto orderRequestDto) {
+        log.info("reducing the stocks");
+        Double totalPrice=0.0;
+        for(OrderRequestItemDto orderRequestItemDto: orderRequestDto.getItems()){
+            Long productId = orderRequestItemDto.getProductId();
+            Integer quantity = orderRequestItemDto.getQuantity();
+
+            Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("Product not found with id: "+productId));
+
+            if(product.getStock()< quantity){
+                throw  new RuntimeException("Product cannot be fulfilled for given quantity");
+            }
+            product.setStock(product.getStock() - quantity);
+            totalPrice += quantity * product.getPrice();
+
+        }
+        return totalPrice;
+    }
 }
