@@ -1,6 +1,9 @@
 package com.codesushant.ecommerce.order_services.service;
 
+import com.codesushant.ecommerce.order_services.clients.InventoryOpenFeignClient;
 import com.codesushant.ecommerce.order_services.dto.OrderRequestDto;
+import com.codesushant.ecommerce.order_services.entity.OrderItem;
+import com.codesushant.ecommerce.order_services.entity.OrderStatus;
 import com.codesushant.ecommerce.order_services.entity.Orders;
 import com.codesushant.ecommerce.order_services.repositoty.OrdersRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
     private final ModelMapper modelMapper;
+    private final InventoryOpenFeignClient inventoryOpenFeignClient;
 
     public List<OrderRequestDto> getAllOrders(){
         log.info("Fetching all orders");
@@ -28,5 +32,19 @@ public class OrdersService {
         log.info("Fetching order with ID: {}", id);
         Orders order = ordersRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
         return modelMapper.map(order, OrderRequestDto.class);
+    }
+
+    public OrderRequestDto createOrder(OrderRequestDto orderRequestDto) {
+        Double totalPrice = inventoryOpenFeignClient.reduceStocks(orderRequestDto);
+
+        Orders orders = modelMapper.map(orderRequestDto,Orders.class );
+        for (OrderItem orderItem: orders.getItems()){
+            orderItem.setOrder(orders);
+        }
+        orders.setTotalPrice(totalPrice);
+        orders.setOrderStatus(OrderStatus.CONFIRMED);
+
+        Orders savedOrder = ordersRepository.save(orders);
+        return modelMapper.map(savedOrder,OrderRequestDto.class);
     }
 }
