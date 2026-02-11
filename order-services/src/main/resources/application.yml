@@ -1,0 +1,22 @@
+resilience4j:
+  retry:
+    instances:
+      inventoryRetry:
+        maxRetryAttempts: 3
+        waitDuration: 10s
+
+# in production enviornment we can set it up like
+#       maxRetryAttempts: 3
+#       waitDuration: 100ms
+
+  ratelimiter:
+    instances:
+      inventoryRateLimiter:
+        limitRefreshPeriod: 5s    # refresh the limit every second
+        limitForPeriod: 1         # max 10 calls in a refresh period
+        timeoutDuration: 1s       # Time to wait for permission before request fails
+
+# in production enviornment we can set it up like
+#        limitRefreshPeriod: 1s
+#        limitForPeriod: 100
+#        timeoutDuration: 100ms
